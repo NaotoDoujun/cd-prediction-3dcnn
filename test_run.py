@@ -48,7 +48,6 @@ def test_pipeline():
     mid_y = resolution // 2
     slice_side = voxel_matrix[:, mid_y, :]  # 2D cross-section array [64, 64]
     
-    # 🌟 ADDED: Downsample from 64x64 to 32x32 strictly for terminal visualization preview
     # This prevents the text art from wrapping around and breaking wide console windows.
     vis_res = 32
     scale = resolution // vis_res  # 64 // 32 = 2
