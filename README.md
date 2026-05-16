@@ -52,7 +52,7 @@ A data processing program that loads 3D CAD models and transforms them into stan
 
 #### Run
 ```bash
-PYTHONPATH=. python src/preprocess.py
+python src/preprocess.py
 ```
 
 #### B. 3D Convolutional Neural Network
@@ -62,7 +62,7 @@ A neural network architecture engineered specifically for capturing spatial and 
 
 #### Run
 ```bash
-PYTHONPATH=. python src/model.py
+python src/model.py
 ```
 
 #### C. Production Training Pipeline
@@ -85,7 +85,7 @@ GLOBAL_RESOLUTION = 64  # Toggle between 64 and 128 depending on your compute ta
 Once your target resolution is set, initiate the training sequence:
 ```bash
 # Execute the training loop using the selected global resolution
-PYTHONPATH=. python src/train.py
+python src/train.py
 ```
 
 #### D. Production Inference Pipeline (Prediction)
@@ -97,13 +97,13 @@ An evaluation script to predict the aerodynamic drag coefficient of a brand-new,
 You can execute inference by targeting your new STL file. By default, the script processes at `64³` resolution using the standard weights:
 ```bash
 # Predict using the default 64³ resolution setup
-PYTHONPATH=. python ./src/predict.py --stl data/raw_stl/new_design_test.stl
+python ./src/predict.py --stl data/raw_stl/new_design_test.stl
 ```
 
 To run inference using a high-fidelity 128³ trained pipeline, simply append the --res 128 argument. The script will automatically load the corresponding cd_predictor_3dcnn_128.pth weights and upscale the preprocessing container:
 ```bash
 # Predict using the high-fidelity 128³ resolution setup
-PYTHONPATH=. python ./src/predict.py --stl data/raw_stl/new_design_test.stl --res 128
+python ./src/predict.py --stl data/raw_stl/new_design_test.stl --res 128
 ```
 
 ## Dataset Scaling & Training Roadmap
@@ -120,5 +120,5 @@ A standalone test script (`test_run.py`) that generates a dummy geometric shape 
 #### Run
 To verify the pipeline health and render a visual 2D cross-section directly inside your terminal window.
 ```bash
-PYTHONPATH=. python test_run.py
+python test_run.py
 ```
