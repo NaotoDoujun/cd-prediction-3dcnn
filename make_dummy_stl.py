@@ -7,10 +7,10 @@ def create_dummy_stl():
     os.makedirs(target_dir, exist_ok=True)
     
     # Create a simple box geometry representing a primitive vehicle body bounds
-    # dimensions: length=4.5m, width=1.8m, height=1.4m
+    # Dimensions: length=4.5m, width=1.8m, height=1.4m (Standard automotive proportions)
     mesh = trimesh.creation.box(extents=[4.5, 1.8, 1.4])
     
-    # Save to the designated raw data path
+    # Save to the designated raw data path for pipeline readiness
     output_path = os.path.join(target_dir, "new_design_test.stl")
     mesh.export(output_path)
     print(f"Successfully generated dummy STL file at: {output_path}")

@@ -1,6 +1,6 @@
 # 3D CNN Aerodynamic Drag (Cd) Prediction Pipeline
 
-This project provides a complete end-to-end deep learning pipeline to predict the Aerodynamic Drag Coefficient (Cd value) of vehicle geometries directly from 3D CAD data (STL files) using a 3D Convolutional Neural Network (3D CNN) in PyTorch.
+This project provides a complete end-to-end deep learning pipeline to predict the Aerodynamic Drag Coefficient ($C_d$ value) of vehicle geometries directly from 3D CAD data (STL files) using a 3D Convolutional Neural Network (3D CNN) in PyTorch.
 
 ### Installation
 
@@ -33,7 +33,7 @@ cd-prediction-3dcnn/
 ```
 
 ### 1. Metadata Configuration (dataset_meta.csv)
-Before running the training pipeline, prepare a dataset_meta.csv file in the root directory. This file maps your STL filenames to their respective ground-truth Cd values (obtained from wind tunnel tests or CFD simulations).
+Before running the training pipeline, prepare a dataset_meta.csv file in the root directory. This file maps your STL filenames to their respective ground-truth $C_d$ values (obtained from wind tunnel tests or CFD simulations).
 
 #### Format Example
 
@@ -67,22 +67,43 @@ PYTHONPATH=. python src/model.py
 
 #### C. Production Training Pipeline
 The core execution script that coordinates data loading, hardware acceleration, and optimization loops.
-- Description: Orchestrates custom PyTorch DataLoaders to map file entries in dataset_meta.csv with raw STL files. Computes Mean Squared Error (MSE) to minimize variance against true Cd values.
-- Key Features: Features on-the-fly caching of .npy voxel matrices to eliminate redundant processing and natively leverages Apple Silicon GPU power via Metal Performance Shaders (MPS).
+- Description: Orchestrates custom PyTorch DataLoaders to map file entries in `dataset_meta.csv` with raw STL files. Computes Mean Squared Error (MSE) to minimize variance against true $C_d$ values.
+- Key Features: Features on-the-fly caching of multi-resolution `.npy` voxel matrices to eliminate redundant processing and natively leverages Apple Silicon GPU power via Metal Performance Shaders (MPS).
+
+#### Pipeline Resolution Control
+The architecture follows a single-source-of-truth configuration. You can globally scale the entire execution pipeline (including preprocessing, model architecture channels, and tensor shapes) by modifying the master constant at the top of `src/train.py`:
+
+```python
+# =========================================================
+# MASTER CONTROL CONSTANT
+# Change this single variable to scale between 64 and 128 pipeline
+# =========================================================
+GLOBAL_RESOLUTION = 64  # Toggle between 64 and 128 depending on your compute targets
+```
 
 #### Run
+Once your target resolution is set, initiate the training sequence:
 ```bash
+# Execute the training loop using the selected global resolution
 PYTHONPATH=. python src/train.py
 ```
+
 #### D. Production Inference Pipeline (Prediction)
 An evaluation script to predict the aerodynamic drag coefficient of a brand-new, unseen CAD geometry using the trained model weights.
-- Description: Takes an unlabelled STL file, passes it through the exact same alignment and voxelization pipeline, loads the trained .pth weight dictionary, and outputs the final predicted continuous Cd value.
-- Key Features: Pure inference setup (utilizing torch.no_grad()) optimized for fast evaluation during iterative vehicle design phases.
+- Description: Takes an unlabelled STL file, passes it through the exact same alignment and voxelization pipeline, loads the trained `.pth` weight dictionary, and outputs the final predicted continuous $C_d$ value.
+- Key Features: Pure inference setup (utilizing `torch.no_grad()`) optimized for fast evaluation during iterative vehicle design phases. It supports dynamic resolution scaling to instantly switch between benchmark environments.
 
 #### Run
+You can execute inference by targeting your new STL file. By default, the script processes at `64³` resolution using the standard weights:
 ```bash
-# Predict the Cd value of a new STL model using trained weights
-PYTHONPATH=. python ./src/predict.py --stl data/raw_stl/test_sphere.stl
+# Predict using the default 64³ resolution setup
+PYTHONPATH=. python ./src/predict.py --stl data/raw_stl/new_design_test.stl
+```
+
+To run inference using a high-fidelity 128³ trained pipeline, simply append the --res 128 argument. The script will automatically load the corresponding cd_predictor_3dcnn_128.pth weights and upscale the preprocessing container:
+```bash
+# Predict using the high-fidelity 128³ resolution setup
+PYTHONPATH=. python ./src/predict.py --stl data/raw_stl/new_design_test.stl --res 128
 ```
 
 ## Dataset Scaling & Training Roadmap
@@ -92,12 +113,12 @@ Below is the recommended configuration pipeline based on the number of available
 | :--- | :--- | :--- | :--- | :--- |
 | **1 ~ 10** <br>*(Sandbox / Test)* | 5 ~ 10 | 1 ~ 4 | High risk of negative predictions or complete overfitting to a single geometry profile. | Pipeline validation only. Verify that preprocessing alignments and GPU (MPS) tensors run without errors. |
 | **50 ~ 100** <br>*(Early Prototype)* | 50 | 4 ~ 8 | Loss begins to decrease steadily. The model captures coarse feature differences (e.g., Sedan vs. SUV). | Establish a baseline validation score. Focus on stabilizing the variance using early dropout constraints. |
-| **300 ~ 500** <br>*(Production Ready)* | 100 ~ 200 | 8_/_16 | Smooth loss convergence. The network accurately maps fine geometric changes to localized Cd changes. | Hyperparameter tuning. Optimize learning rates and test deep spatial features for precise aerodynamic tracking. |
+| **300 ~ 500** <br>*(Production Ready)* | 100 ~ 200 | 8_/_16 | Smooth loss convergence. The network accurately maps fine geometric changes to localized $C_d$ changes. | Hyperparameter tuning. Optimize learning rates and test deep spatial features for precise aerodynamic tracking. |
 
 ### Pipeline Verification (Quick Test)
 A standalone test script (`test_run.py`) that generates a dummy geometric shape to validate the end-to-end preprocessing, grid alignment, and voxelization logic.
 #### Run
 To verify the pipeline health and render a visual 2D cross-section directly inside your terminal window.
 ```bash
-python test_run.py
+PYTHONPATH=. python test_run.py
 ```

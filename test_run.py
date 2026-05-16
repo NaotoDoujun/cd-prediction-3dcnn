@@ -2,10 +2,10 @@ import os
 import numpy as np
 import trimesh
 from src.preprocess import convert_stl_to_aligned_voxels
+from src.train import GLOBAL_RESOLUTION
 
 def test_pipeline():
     print("1. Generating a local 3D mesh (Sphere) for verification...")
-    # Generate a standard sphere using trimesh built-in functions
     mesh = trimesh.creation.icosphere(subdivisions=3, radius=0.5)
     
     # Shift geometry away from origin to simulate poor CAD exports and test rigid alignment
@@ -15,7 +15,8 @@ def test_pipeline():
     mesh.export(test_stl_path)
     print(f"   -> Saved misaligned test STL file to: {test_stl_path}")
     
-    resolution = 64
+    # Synchronize resolution size automatically with the training pipeline configuration
+    resolution = GLOBAL_RESOLUTION
     print(f"\n2. Executing voxelization pipeline with rigid alignment (Resolution: {resolution})...")
     voxel_matrix = convert_stl_to_aligned_voxels(test_stl_path, resolution=resolution)
     
@@ -33,37 +34,37 @@ def test_pipeline():
     min_z = np.min(z_indices)
     print(f"   [Z-axis (Vertical)] Minimum index: {min_z} (Expected: 0 -> Grounded contact verification)")
     
-    # Y-axis (Lateral): Check if center of mass maps near grid midpoint (64 / 2 = 31.5)
+    # Y-axis / X-axis: Dynamically compute the center threshold based on target resolution
+    expected_center = resolution / 2 - 0.5
     mean_y = np.mean(y_indices)
-    print(f"   [Y-axis (Lateral)] Center of mass index: {mean_y:.2f} (Expected: ~31.5 -> Central symmetry check)")
+    print(f"   [Y-axis (Lateral)] Center of mass index: {mean_y:.2f} (Expected: ~{expected_center:.1f} -> Central symmetry check)")
     
-    # X-axis (Longitudinal): Check if center of mass maps near grid midpoint
     mean_x = np.mean(x_indices)
-    print(f"   [X-axis (Longitudinal)] Center of mass index: {mean_x:.2f} (Expected: ~31.5 -> Central position check)")
+    print(f"   [X-axis (Longitudinal)] Center of mass index: {mean_x:.2f} (Expected: ~{expected_center:.1f} -> Central position check)")
 
     # ---------------------------------------------------------
-    # 4. Terminal Voxel Visualizer (With Auto-Downsampling)
+    # 4. Terminal Voxel Visualizer (With Dynamic Auto-Downsampling)
     # ---------------------------------------------------------
     print("\n4. Displaying mid-plane cross-section (Side view profile):")
     mid_y = resolution // 2
-    slice_side = voxel_matrix[:, mid_y, :]  # 2D cross-section array [64, 64]
+    slice_side = voxel_matrix[:, mid_y, :]  # 2D cross-section array [Res, Res]
     
-    # This prevents the text art from wrapping around and breaking wide console windows.
+    # Scale down to standard 32 bins to prevent console character wrapping on higher resolutions
     vis_res = 32
-    scale = resolution // vis_res  # 64 // 32 = 2
+    scale = max(1, resolution // vis_res)  # Evaluates to 2 for 64³ and 4 for 128³ pipeline
     
     for z in reversed(range(vis_res)):
         row_chars = ""
         for x in range(vis_res):
-            # Check a 2x2 block area; if any voxel is active, mark it as filled
+            # Inspect pooled spatial blocks to consolidate multi-resolution grids safely
             block = slice_side[z*scale : (z+1)*scale, x*scale : (x+1)*scale]
             row_chars += "■" if np.any(block > 0) else "  "
             
         if "■" in row_chars:
             print(f"Z={z:02d} | {row_chars}")
             
-    # Save test output
-    output_npy = "data/processed_voxels/test_sphere.npy"
+    # Append the resolution tag to file name to isolate cache benchmarks safely
+    output_npy = f"data/processed_voxels/test_sphere_{resolution}res.npy"
     np.save(output_npy, voxel_matrix)
     print(f"\n5. Voxel data matrix exported successfully: {output_npy}")
 
