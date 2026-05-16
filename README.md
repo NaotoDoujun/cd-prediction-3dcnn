@@ -93,3 +93,11 @@ Below is the recommended configuration pipeline based on the number of available
 | **1 ~ 10** <br>*(Sandbox / Test)* | 5 ~ 10 | 1 ~ 4 | High risk of negative predictions or complete overfitting to a single geometry profile. | Pipeline validation only. Verify that preprocessing alignments and GPU (MPS) tensors run without errors. |
 | **50 ~ 100** <br>*(Early Prototype)* | 50 | 4 ~ 8 | Loss begins to decrease steadily. The model captures coarse feature differences (e.g., Sedan vs. SUV). | Establish a baseline validation score. Focus on stabilizing the variance using early dropout constraints. |
 | **300 ~ 500** <br>*(Production Ready)* | 100 ~ 200 | 8_/_16 | Smooth loss convergence. The network accurately maps fine geometric changes to localized Cd changes. | Hyperparameter tuning. Optimize learning rates and test deep spatial features for precise aerodynamic tracking. |
+
+### Pipeline Verification (Quick Test)
+A standalone test script (`test_run.py`) that generates a dummy geometric shape to validate the end-to-end preprocessing, grid alignment, and voxelization logic.
+#### Run
+To verify the pipeline health and render a visual 2D cross-section directly inside your terminal window.
+```bash
+python test_run.py
+```

@@ -4,60 +4,59 @@ import trimesh
 from src.preprocess import convert_stl_to_aligned_voxels
 
 def test_pipeline():
-    print("1. テスト用の3Dメッシュ（球体）をローカルで生成中...")
-    # ネットからダウンロードせず、trimeshの機能で直径1.0の球体を生成します
+    print("1. Generating a local 3D mesh (Sphere) for verification...")
+    # Generate a standard sphere with a radius of 0.5 using trimesh built-in functions
     mesh = trimesh.creation.icosphere(subdivisions=3, radius=0.5)
     
-    # 本番の動きをシミュレートするため、わざと原点から大きくズラし、
-    # 空中に浮かせた状態にしてからSTLに保存します（アライメントのテストのため）
+    # Shift geometry away from origin to simulate poor CAD exports and test rigid alignment
     mesh.apply_translation([10.0, -5.0, 8.5])
     
     test_stl_path = "data/raw_stl/test_sphere.stl"
     mesh.export(test_stl_path)
-    print(f"   -> 浮いた状態のテスト用STLを保存しました: {test_stl_path}")
+    print(f"   -> Saved misaligned test STL file to: {test_stl_path}")
     
-    print("\n2. アライメント調整付きボクセル化を実行中（解像度: 32）...")
+    print("\n2. Executing voxelization pipeline with rigid alignment (Resolution: 32)...")
     resolution = 32
     voxel_matrix = convert_stl_to_aligned_voxels(test_stl_path, resolution=resolution)
     
-    print(f"   -> 変換完了！ 配列形状: {voxel_matrix.shape}")
-    print(f"   -> 物体が存在するボクセル数: {int(np.sum(voxel_matrix))}")
+    print(f"   -> Conversion complete! Array shape: {voxel_matrix.shape}")
+    print(f"   -> Filled voxel count (Solid object): {int(np.sum(voxel_matrix))}")
     
     # ---------------------------------------------------------
-    # 3. アライメントの検証
+    # 3. Alignment Verification
     # ---------------------------------------------------------
-    print("\n3. アライメントが意図通りか検証します:")
+    print("\n3. Validating spatial alignment matrices:")
     
     z_indices, y_indices, x_indices = np.where(voxel_matrix > 0)
     
-    # Z軸（上下）の検証：一番底面（インデックス0）に接地しているか？
+    # Z-axis (Vertical): Check if anchored properly to index 0 (ground contact)
     min_z = np.min(z_indices)
-    print(f"   [Z軸 (上下)] 最下部のインデックス: {min_z} (期待値: 0 -> 底面に接地しているか)")
+    print(f"   [Z-axis (Vertical)] Minimum index: {min_z} (Expected: 0 -> Grounded contact verification)")
     
-    # Y軸（左右）の検証：配列の中央（32の半分＝15.5付近）を中心に分布しているか？
+    # Y-axis (Lateral): Check if center of mass maps near grid midpoint (32 / 2 = 15.5)
     mean_y = np.mean(y_indices)
-    print(f"   [Y軸 (左右)] 重心のインデックス: {mean_y:.2f} (期待値: 15.5付近 -> 左右中央にあるか)")
+    print(f"   [Y-axis (Lateral)] Center of mass index: {mean_y:.2f} (Expected: ~15.5 -> Central symmetry check)")
     
-    # X軸（前後）の検証：配列の中央を中心に分布しているか？
+    # X-axis (Longitudinal): Check if center of mass maps near grid midpoint
     mean_x = np.mean(x_indices)
-    print(f"   [X軸 (前後)] 重心のインデックス: {mean_x:.2f} (期待値: 15.5付近 -> 前後中央にあるか)")
+    print(f"   [X-axis (Longitudinal)] Center of mass index: {mean_x:.2f} (Expected: ~15.5 -> Central position check)")
 
     # ---------------------------------------------------------
-    # 4. ターミナル上での簡易ビジュアライズ（断面の表示）
+    # 4. Terminal Voxel Visualizer (Cross-Section Slice)
     # ---------------------------------------------------------
-    print("\n4. ボクセルデータの中心断面（真横から見た図）を表示します:")
+    print("\n4. Displaying mid-plane cross-section (Side view profile):")
     mid_y = resolution // 2
-    slice_side = voxel_matrix[:, mid_y, :]  # [Z, X] の2D断面
+    slice_side = voxel_matrix[:, mid_y, :]  # 2D cross-section array [Z, X]
     
     for z in reversed(range(resolution)):
         row_chars = "".join(["■" if slice_side[z, x] > 0 else "  " for x in range(resolution)])
         if "■" in row_chars:
             print(f"Z={z:02d} | {row_chars}")
             
-    # 保存テスト
+    # Save test output
     output_npy = "data/processed_voxels/test_sphere.npy"
     np.save(output_npy, voxel_matrix)
-    print(f"\n5. ボクセルデータを保存しました: {output_npy}")
+    print(f"\n5. Voxel data matrix exported successfully: {output_npy}")
 
 if __name__ == "__main__":
     os.makedirs("data/raw_stl", exist_ok=True)
