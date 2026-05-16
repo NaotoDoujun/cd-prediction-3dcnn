@@ -1,0 +1,71 @@
+# ==========================================
+# 3D CNN Aerodynamic Project Specifics
+# ==========================================
+# Exclude raw large datasets and generated voxel caches
+data/processed_voxels/*
+data/raw_stl/*
+
+# Allow tracking the directory structure itself by ignoring everything except .gitkeep
+!data/processed_voxels/.gitkeep
+!data/raw_stl/.gitkeep
+
+# Exclude trained model weights (Deep Learning checkpoints)
+models/*.pth
+models/*.pt
+
+# ==========================================
+# Python Standard Environment
+# ==========================================
+# Byte-compiled / optimized / DLL objects
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments (Highly Critical to exclude)
+.venv/
+venv/
+ENV/
+env/
+ENV_DIR/
+
+# pip log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ==========================================
+# IDEs and System Files
+# ==========================================
+# macOS specific files (Finder info, etc.)
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# VS Code
+.vscode/
+
+# PyCharm / IntelliJ
+.idea/

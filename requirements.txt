@@ -1,0 +1,12 @@
+# --- Core Deep Learning Framework (Aligned with your other projects) ---
+torch == 2.9.1
+
+# --- 3D Data Processing & Geometry ---
+trimesh[easy] >= 4.0.0
+numpy >= 1.24.0
+scipy >= 1.11.0
+pandas >= 2.0.0
+
+# --- Utilities & Visualization ---
+matplotlib == 3.10.8
+tqdm >= 4.66.0
