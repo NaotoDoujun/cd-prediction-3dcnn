@@ -5,6 +5,9 @@
 data/processed_voxels/*
 data/raw_stl/*
 
+# Exclude generated visualization plots (Loss curves and scatter plots)
+outputs/*
+
 # Allow tracking the directory structure itself by ignoring everything except .gitkeep
 !data/processed_voxels/.gitkeep
 !data/raw_stl/.gitkeep

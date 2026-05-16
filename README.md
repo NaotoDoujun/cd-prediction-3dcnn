@@ -24,11 +24,18 @@ cd-prediction-3dcnn/
 │   └── raw_stl/            # Input CAD geometry files (.stl)
 ├── models/
 │   └── cd_predictor_3dcnn.pth # Saved model weights
+├── outputs/                # Generated visualization plots
+│   ├── loss_history.png    # Training loss curve profile
+│   └── prediction_accuracy.png # Predicted vs. True Cd value scatter plot
 ├── src/
 │   ├── model.py            # 3D CNN architecture
+│   ├── predict.py          # Inference script for aerodynamic drag
 │   ├── preprocess.py       # STL alignment & voxelization logic
-│   └── train.py            # Training loop with Apple Silicon (MPS) support
+│   └── train.py            # Training loop with Apple Silicon (MPS) & CUDA 
 ├── dataset_meta.csv        # Metadata mapping filenames to true Cd values
+├── make_dummy_stl.py       # Helper script to generate a primitive 3D box for pipeline preparation
+├── test_run.py             # 64³ pipeline verification script with auto-downsampled terminal preview
+├── requirements.txt
 └── README.md
 ```
 
