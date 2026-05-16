@@ -1,13 +1,6 @@
-# Project Overview: 3D CNN Aerodynamic Drag (Cd) Prediction Pipeline
+# 3D CNN Aerodynamic Drag (Cd) Prediction Pipeline
 
 This project provides a complete end-to-end deep learning pipeline to predict the Aerodynamic Drag Coefficient (Cd value) of vehicle geometries directly from 3D CAD data (STL files) using a 3D Convolutional Neural Network (3D CNN) in PyTorch.
-
-## Requirement
-* torch == 2.9.1
-* trimesh[easy] >= 4.0.0
-* numpy >= 1.24.0
-* pandas >= 2.0.0
-* tqdm >= 4.66.0
 
 ### Installation
 
