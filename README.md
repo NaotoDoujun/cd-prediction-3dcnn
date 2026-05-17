@@ -58,7 +58,7 @@ Before running the training pipeline, prepare a dataset_meta.csv file in the roo
 ```csv
 filename,cd_value
 test_sphere.stl,0.47
-car_model_v1.stl,0.32
+toyota_supra.stl,0.30
 ```
 
 ### 2. Pipeline Components
@@ -155,3 +155,6 @@ To verify the pipeline health and render a visual 2D cross-section directly insi
 ```bash
 python test_run.py
 ```
+
+### License
+This project is licensed under the **MIT License**. It is open-source software, meaning anyone is free to use, modify, distribute, and implement it for both personal and commercial purposes (please refer to the `LICENSE` file for full details).
