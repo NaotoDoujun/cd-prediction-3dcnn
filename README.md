@@ -158,5 +158,15 @@ To verify the pipeline health and render a visual 2D cross-section directly insi
 python test_run.py
 ```
 
+### Inspiration & Research Background
+
+The core architectural concept of leveraging spatial voxelization for automotive aerodynamic prediction was highly inspired by the methodology explored in the following research paper:
+
+- **Paper Title:** *Prediction of Aerodynamic Forces on Car Shapes by Machine Learning Using Voxel Representation* (ボクセル表現を用いた機械学習による自動車形状の空気力予測)
+- **Journal:** Trans. Soc. Automot. Eng. Jpn. (自動車技術会論文集), Vol. 52, No. 3, 2021.
+- **Link:** [J-STAGE / DOI Link](https://www.jstage.jst.go.jp/article/jsaeronbun/52/3/52_20214248/_pdf)
+
+*Note: This repository is an entirely independent, original implementation developed from scratch using open-source utilities. It does not share code, data, or direct alignment with the aforementioned publication.*
+
 ### License
 This project is licensed under the **MIT License**. It is open-source software, meaning anyone is free to use, modify, distribute, and implement it for both personal and commercial purposes (please refer to the `LICENSE` file for full details).
