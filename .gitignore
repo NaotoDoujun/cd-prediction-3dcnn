@@ -5,16 +5,16 @@
 data/processed_voxels/*
 data/raw_stl/*
 
-# Exclude generated visualization plots (Loss curves and scatter plots)
-outputs/*
+# Exclude trained model weights (Deep Learning checkpoints)
+models/*
 
-# Allow tracking the directory structure itself by ignoring everything except .gitkeep
+# Exclude auto-generated visualization plots and graphs
+outputs/
+
+# Allow tracking the core directory structures via placeholder flags
 !data/processed_voxels/.gitkeep
 !data/raw_stl/.gitkeep
-
-# Exclude trained model weights (Deep Learning checkpoints)
-models/*.pth
-models/*.pt
+!models/.gitkeep
 
 # ==========================================
 # Python Standard Environment

@@ -2,10 +2,26 @@
 
 This project provides a complete end-to-end deep learning pipeline to predict the Aerodynamic Drag Coefficient ($C_d$ value) of vehicle geometries directly from 3D CAD data (STL files) using a 3D Convolutional Neural Network (3D CNN) in PyTorch.
 
+### Requirements & Environments
+The pipeline cleanly isolates its core math engine from interactive graphics binaries to maximize platform compatibility.
+
+- **Core Prediction Pipeline:** Compatible with **Python 3.10 through Python 3.12+**. Operates completely headless and has minimal dependency requirements.
+- **3D Visualization Feature (`--visualize`):** Powered by `open3d`. Due to upstream pre-compiled binary constraints within the Open3D ecosystem on newer runtimes, **Python 3.11** is highly recommended if you intend to use the interactive visualizer layer.
+
 ### Installation
 
+Choose the installation tier that matches your active project objective:
+
+#### Option A: Core Inference Only (Lightweight & Unconstrained)
+Best for production environments, automated scripting, or systems running Python 3.12+. Installs only the baseline matrix engines and PyTorch frameworks.
 ```bash
 pip install -r requirements.txt
+```
+
+#### Option B: Full Development & Visualization (Includes Open3D Engine)
+Required if you want to launch the interactive 3D mesh and voxel grid alignment preview overlays.
+```bash
+pip install -r requirements-dev.txt
 ```
 
 ### Directory Structure
@@ -22,14 +38,16 @@ cd-prediction-3dcnn/
 │   └── prediction_accuracy.png # Predicted vs. True Cd value scatter plot
 ├── src/
 │   ├── model.py            # 3D CNN architecture
-│   ├── predict.py          # Inference script for aerodynamic drag
+│   ├── predict.py          # Inference script for aerodynamic drag (Supports dynamic Open3D preview)
 │   ├── preprocess.py       # STL alignment & voxelization logic
-│   └── train.py            # Training loop with Apple Silicon (MPS) & CUDA 
+│   ├── train.py            # Training loop with Apple Silicon (MPS) & CUDA 
+│   └── visualize.py        # Standalone 3D Open3D overlay utility (Mesh + Voxel structural inspection)
 ├── dataset_meta.csv        # Metadata mapping filenames to true Cd values
 ├── make_dummy_stl.py       # Helper script to generate a primitive 3D box for pipeline preparation
-├── test_run.py             # 64³ pipeline verification script with auto-downsampled terminal preview
-├── requirements.txt
-└── README.md
+├── README.md
+├── requirements-dev.txt    # Full development suite including Open3D rendering packages
+├── requirements.txt        # Production-grade dependencies for core CNN computation
+└── test_run.py             # 64³ pipeline verification script with auto-downsampled terminal preview
 ```
 
 ### 1. Metadata Configuration (dataset_meta.csv)
@@ -105,6 +123,21 @@ To run inference using a high-fidelity 128³ trained pipeline, simply append the
 # Predict using the high-fidelity 128³ resolution setup
 python ./src/predict.py --stl data/raw_stl/new_design_test.stl --res 128
 ```
+
+#### 3D Interactive Inspection (Optional)
+If you have installed the full development suite (requirements-dev.txt), you can overlay the original high-resolution CAD mesh with the downsampled 3D CNN voxel input matrix.
+Simply append the --visualize flag to any execution command:
+```bash
+# Run 64³ inference and launch the Open3D evaluation window
+python ./src/predict.py --stl data/raw_stl/toyota-supra.stl --visualize
+```
+
+<p align="left">
+<img src="assets/visualizer_preview.png" width="720" alt="3D CNN Voxel Grid & CAD Mesh Overlay Preview">
+</p>
+<em>Figure: Interactive Fusion Preview showcasing the original CAD mesh (Crimson Red) aligned perfectly inside the 3D CNN input grid (Blue Cubes).</em>
+
+- 	Controls: Once the window initializes, use Left-Click + Drag to rotate the viewport, and use the Mouse Wheel to zoom out and capture the full spatial alignment profile.
 
 ## Dataset Scaling & Training Roadmap
 Below is the recommended configuration pipeline based on the number of available 3D CAD variants in your dataset:
