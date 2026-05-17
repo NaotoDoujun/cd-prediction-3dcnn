@@ -137,6 +137,8 @@ python ./src/predict.py --stl data/raw_stl/toyota-supra.stl --visualize
 </p>
 <em>Figure: Interactive Fusion Preview showcasing the original CAD mesh (Crimson Red) aligned perfectly inside the 3D CNN input grid (Blue Cubes).</em>
 
+<small>🚘 3D Model Source: <a href="https://www.printables.com/model/22546-2020-toyota-supra" target="_blank">2020 Toyota Supra</a> by <a href="https://www.printables.com/@ShadowcraftDes_48872" target="_blank">Shadowcraft Designs</a> (Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY 4.0</a>)</small>
+
 - 	Controls: Once the window initializes, use Left-Click + Drag to rotate the viewport, and use the Mouse Wheel to zoom out and capture the full spatial alignment profile.
 
 ## Dataset Scaling & Training Roadmap
