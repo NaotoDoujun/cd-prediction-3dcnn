@@ -232,11 +232,11 @@ python ./src/predict_pointnet.py --stl data/raw_stl/toyota_supra.stl --points 40
 
 The core architectural concept of leveraging spatial voxelization for automotive aerodynamic prediction was highly inspired by the methodology explored in the following research paper:
 
-- **Paper Title:** *Prediction of Aerodynamic Forces on Car Shapes by Machine Learning Using Voxel Representation* (ボクセル表現を用いた機械学習による自動車形状の空気力予測)
+- **Paper Title:** *Development of a Surrogate Model for Predicting Automotive Aerodynamic Performance Using Machine Learning* (機械学習を用いた自動車空力性能を予測するためのサロゲートモデル開発)
 - **Journal:** Trans. Soc. Automot. Eng. Jpn. (自動車技術会論文集), Vol. 52, No. 3, 2021.
 - **Link:** [J-STAGE / DOI Link](https://www.jstage.jst.go.jp/article/jsaeronbun/52/3/52_20214248/_pdf)
 
-- **Paper Title:** *Fluid drag prediction of 3D objects using point cloud neural networks* (点群ニューラルネットワークによる3次元物体の流体抗力予測)
+- **Paper Title:** *Development of a Machine Learning-Based Method to Derive Vehicle Shapes and Flow Fields for Aerodynamic Drag Reduction* (機械学習を用いた空気抵抗を低減する自動車形状および流れ場の導出手法の開発)
 - **Journal:** Trans. JSME (日本機械学会論文集), Vol. 91, No. 948, 2025.
 - **Reference Link:** [J-STAGE / DOI Link](https://www.jstage.jst.go.jp/article/transjsme/91/948/91_25-00052/_pdf)
 
