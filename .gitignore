@@ -2,6 +2,7 @@
 # 3D CNN Aerodynamic Project Specifics
 # ==========================================
 # Exclude raw large datasets and generated voxel caches
+data/processed_pcd/*
 data/processed_voxels/*
 data/raw_stl/*
 
@@ -12,6 +13,7 @@ models/*
 outputs/
 
 # Allow tracking the core directory structures via placeholder flags
+!data/processed_pcd/.gitkeep
 !data/processed_voxels/.gitkeep
 !data/raw_stl/.gitkeep
 !models/.gitkeep

@@ -1,6 +1,20 @@
-# 3D CNN Aerodynamic Drag (Cd) Prediction Pipeline
+# Automotive Aerodynamic Drag (Cd) Prediction Pipeline
 
-This project provides a complete end-to-end deep learning pipeline to predict the Aerodynamic Drag Coefficient ($C_d$ value) of vehicle geometries directly from 3D CAD data (STL files) using a 3D Convolutional Neural Network (3D CNN) in PyTorch.
+### Multi-Architecture Deep Learning with 3D CNN & PointNet++
+
+This repository provides an end-to-end deep learning engineering pipeline to predict the Aerodynamic Drag Coefficient ($C_d$ value) of vehicle geometries directly from 3D CAD data (STL files). It implements two distinct geometric feature-extraction paradigms in PyTorch: a spatial **3D Convolutional Neural Network (3D CNN)** using voxel grids, and a geometric **PointNet++ (PointNet2)** model using raw surface point clouds.
+
+## System Architectures
+
+### 1. Voxel-Based 3D CNN Pipeline
+* **Geometric Representation:** Fixed cubic voxel grids ($64^3$ or $128^3$ continuous binary states).
+* **Core Logic:** Treats the geometric bounding box as an absolute macro environment. Best suited for mapping global body proportions and structural presence within a localized discrete box grid.
+* **Visual Alignment Origin:** Locked to the absolute front-left lower floor corner of the computational volume boundary box.
+
+### 2. Deep Geometric PointNet++ Pipeline
+* **Geometric Representation:** Uniformly sampled surface node maps ($2048$ to $8192$ points).
+* **Core Logic:** Utilizes Set Abstraction (SA) modules featuring Farthest Point Sampling (FPS) and Point Grouping Ball-Queries to extract granular, multi-scale localized flow-path features (such as canopy curvature or rear spoilers) directly from surface coordinates without spatial quantization loss.
+* **Visual Alignment Origin:** Locked perfectly to the geometric centroid mass center along the X-Y axes, with the floor locked to $Z=0$.
 
 ### Requirements & Environments
 The pipeline cleanly isolates its core math engine from interactive graphics binaries to maximize platform compatibility.
@@ -29,18 +43,27 @@ pip install -r requirements-dev.txt
 ```text
 cd-prediction-3dcnn/
 ├── data/
+│   ├── processed_pcd/      # Cached normalized point clouds (.npy format)
 │   ├── processed_voxels/   # Cached voxel matrices (.npy)
 │   └── raw_stl/            # Input CAD geometry files (.stl)
 ├── models/
-│   └── cd_predictor_3dcnn.pth # Saved model weights
+│   ├── cd_predictor_3dcnn_64.pth       # Trained 3D CNN weights baseline
+│   └── cd_predictor_pointnet_4096.pth  # Trained PointNet++ structural weights
 ├── outputs/                # Generated visualization plots
-│   ├── loss_history.png    # Training loss curve profile
-│   └── prediction_accuracy.png # Predicted vs. True Cd value scatter plot
+│   ├── loss_history_pointnet.png   # Convergence curve for PointNet++ training
+│   ├── loss_history.png            # Convergence curve for 3D CNN training
+│   ├── prediction_accuracy_pointnet.png    #
+│   └── prediction_accuracy.png     #
 ├── src/
+│   ├── model_pointnet.py   # Pure PyTorch-Native PointNet++ layer stack
 │   ├── model.py            # 3D CNN architecture
+│   ├── predict_pointnet.py # Inference script for PointNet++ (Supports Open3D preview)
 │   ├── predict.py          # Inference script for aerodynamic drag (Supports dynamic Open3D preview)
+│   ├── preprocess_pointnet.py  # Farthest Point Sampling & node normalization
 │   ├── preprocess.py       # STL alignment & voxelization logic
+│   ├── train_pointnet.py   # Dataset loop and driver for PointNet++ training
 │   ├── train.py            # Training loop with Apple Silicon (MPS) & CUDA 
+│   ├── visualize_pointnet.py   # Open3D render wrappers for node-mesh fusion
 │   └── visualize.py        # Standalone 3D Open3D overlay utility (Mesh + Voxel structural inspection)
 ├── dataset_meta.csv        # Metadata mapping filenames to true Cd values
 ├── make_dummy_stl.py       # Helper script to generate a primitive 3D box for pipeline preparation
@@ -50,7 +73,7 @@ cd-prediction-3dcnn/
 └── test_run.py             # 64³ pipeline verification script with auto-downsampled terminal preview
 ```
 
-### 1. Metadata Configuration (dataset_meta.csv)
+## 1. Metadata Configuration (dataset_meta.csv)
 Before running the training pipeline, prepare a dataset_meta.csv file in the root directory. This file maps your STL filenames to their respective ground-truth $C_d$ values (obtained from wind tunnel tests or CFD simulations).
 
 #### Format Example
@@ -61,7 +84,7 @@ test_sphere.stl,0.47
 toyota_supra.stl,0.30
 ```
 
-### 2. Pipeline Components
+## 2. Voxel-Based 3D CNN Pipeline Components
 
 #### A. 3D Geometry Preprocessor
 A data processing program that loads 3D CAD models and transforms them into standardized inputs optimized for deep learning.
@@ -129,7 +152,7 @@ If you have installed the full development suite (requirements-dev.txt), you can
 Simply append the --visualize flag to any execution command:
 ```bash
 # Run 64³ inference and launch the Open3D evaluation window
-python ./src/predict.py --stl data/raw_stl/toyota-supra.stl --visualize
+python ./src/predict.py --stl data/raw_stl/toyota_supra.stl --visualize
 ```
 
 <p align="left">
@@ -158,6 +181,53 @@ To verify the pipeline health and render a visual 2D cross-section directly insi
 python test_run.py
 ```
 
+## 3. Deep Geometric PointNet++ Pipeline Components
+
+This parallel pipeline processes raw surface coordinate nodes instead of discrete voxel boxes. By replacing heavy spatial quantization with multi-scale Set Abstraction modules, it extracts highly localized aerodynamic features (such as spoiler angles, roof slope transitions, and wing curvatures) directly from the vehicle's surface coordinates.
+
+#### Preprocessing & Node Alignment Specifications
+Unlike the voxel grid, which aligns to an absolute outer boundary corner, the PointNet++ pipeline applies an **Aerodynamic Mass-Centric Normalization** workflow via `src/preprocess_pointnet.py`:
+1. **Centroid Alignment:** The vehicle geometry is automatically shifted so that its horizontal X-and-Y geometric mass center sits exactly at the `(0, 0)` spatial origin.
+2. **Ground Clearance Lock:** The lowest point of the vehicle's bottom undercarriage/wheels is tightly locked onto the `Z = 0` baseline.
+3. **Unit Scale Convergence:** The entire point cloud is uniformly scaled by the maximum bounding extent, fitting all coordinates cleanly within a localized unit context to ensure robust neural gradient propagation.
+
+#### Sampling Pipeline & Cache Control
+Generating representative spatial centers via Farthest Point Sampling (FPS) in real-time can become a bottleneck during multi-epoch training iterations. To maintain optimal efficiency, the pipeline implements an automated caching mechanism:
+* Raw STL files are loaded and uniformly sampled across their triangular faces using `trimesh`.
+* The resulting coordinate matrices are saved into a dedicated cache directory as compressed NumPy arrays, appended with their specific point density context (e.g., `_4096pts.npy` or `_8192pts.npy`).
+* If a cache file matching the exact target point density is detected, the preprocessing stage is bypassed instantly to keep data loaders fully saturated.
+
+#### The Master Control Constant
+You can scale the resolution and target node density of your point cloud network by adjusting a single centralized global constant located at the top of `src/train_pointnet.py`:
+
+```python
+# =========================================================
+# MASTER CONTROL CONSTANT
+# Change this single variable to scale between 2048, 4096, or 8192 pipeline density
+# =========================================================
+GLOBAL_POINTS = 4096  # Target point cloud sampling density context
+```
+- 2048 Points: Ultra-lightweight setup. Extremely fast computation loop, ideal for debugging pipeline operations.
+- 4096 Points: The recommended standard baseline. Captures prominent vehicle silhouettes and basic canopy profiles efficiently.
+- 8192 Points: High-resolution mode. Captures fine-grain aerodynamic elements such as rear spoilers, splitters, and localized curvature transitions without choking the Apple Silicon MPS hardware.
+
+#### How to Run: PointNet++ Pipeline
+1. Model Training
+To trigger the complete PointNet++ dataset loop, continuous feature extraction via custom Python-native Set Abstraction layers, and regression learning, execute:
+```bash
+python ./src/train_pointnet.py
+```
+
+2. Model Inference & Fusion Visualization
+To run inference on an unseen target vehicle and instantly launch an interactive graphics overlay window displaying the sampled point nodes combined with the original translucent CAD mesh:
+```bash
+python ./src/predict_pointnet.py --stl data/raw_stl/toyota_supra.stl --points 4096 --visualize
+```
+<p align="left">
+<img src="assets/visualizer_preview_pointnet.png" width="720" alt="PointNet++ Node Mesh Fusion Preview">
+</p>
+<em>Figure: Interactive Fusion Preview showcasing the uniformly sampled surface cloud nodes (Cyan Points) structurally synchronized over the source CAD geometry (Crimson Wireframe).</em>
+
 ### Inspiration & Research Background
 
 The core architectural concept of leveraging spatial voxelization for automotive aerodynamic prediction was highly inspired by the methodology explored in the following research paper:
@@ -165,6 +235,10 @@ The core architectural concept of leveraging spatial voxelization for automotive
 - **Paper Title:** *Prediction of Aerodynamic Forces on Car Shapes by Machine Learning Using Voxel Representation* (ボクセル表現を用いた機械学習による自動車形状の空気力予測)
 - **Journal:** Trans. Soc. Automot. Eng. Jpn. (自動車技術会論文集), Vol. 52, No. 3, 2021.
 - **Link:** [J-STAGE / DOI Link](https://www.jstage.jst.go.jp/article/jsaeronbun/52/3/52_20214248/_pdf)
+
+- **Paper Title:** *Fluid drag prediction of 3D objects using point cloud neural networks* (点群ニューラルネットワークによる3次元物体の流体抗力予測)
+- **Journal:** Trans. JSME (日本機械学会論文集), Vol. 91, No. 948, 2025.
+- **Reference Link:** [J-STAGE / DOI Link](https://www.jstage.jst.go.jp/article/transjsme/91/948/91_25-00052/_pdf)
 
 *Note: This repository is an entirely independent, original implementation developed from scratch using open-source utilities. It does not share code, data, or direct alignment with the aforementioned publication.*
 
