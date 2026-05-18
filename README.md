@@ -52,8 +52,8 @@ cd-prediction-3dcnn/
 ├── outputs/                # Generated visualization plots
 │   ├── loss_history_pointnet.png   # Convergence curve for PointNet++ training
 │   ├── loss_history.png            # Convergence curve for 3D CNN training
-│   ├── prediction_accuracy_pointnet.png    #
-│   └── prediction_accuracy.png     #
+│   ├── prediction_accuracy_pointnet.png    # Regression accuracy scatter plot for PointNet++
+│   └── prediction_accuracy.png     # Regression accuracy scatter plot for 3D CNN
 ├── src/
 │   ├── model_pointnet.py   # Pure PyTorch-Native PointNet++ layer stack
 │   ├── model.py            # 3D CNN architecture
