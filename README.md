@@ -43,7 +43,7 @@ pip install -r requirements-dev.txt
 Before running any scripts, ensure the root directory is included in your Python path:
 
 ```bash
-export PYTHONPATH=\$PWD
+export PYTHONPATH=$PWD
 ```
 
 ### Directory Structure
