@@ -38,6 +38,14 @@ Required if you want to launch the interactive 3D mesh and voxel grid alignment 
 pip install -r requirements-dev.txt
 ```
 
+### Environment Setup
+
+Before running any scripts, ensure the root directory is included in your Python path:
+
+```bash
+export PYTHONPATH=\$PWD
+```
+
 ### Directory Structure
 
 ```text
